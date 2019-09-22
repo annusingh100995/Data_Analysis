@@ -323,7 +323,45 @@ class NeuralNetMLP(object):
 nn = NeuralNetMLP(n_hidden=100, l2=0.01, epochs=200, eta= 0.0005, minibatch_size=100, shuffle=True, seed=1)
 nn.fit(X_train=X_train[:55000], y_train=y_train[:55000],X_valid = X_train[55000:], y_valid=y_train[55000:])
 
-plt.plot(range(nn.epochs), nn_eval_['cost'])
+plt.plot(range(nn.epochs), nn.eval_['cost'])
 plt.ylabel('Cost')
 plt.xlabel('Epochs')
+plt.show() 
+
+plt.plot(range(nn.epochs), nn.eval_['cost'])
+plt.xlabel('Cost')
+plt.ylabel('Epochs')
+plt.title('Cost vs Epochs')
 plt.show()
+
+plt.plot(range(nn.epochs), nn.eval_['train_acc'], label='training')
+plt.plot(range(nn.epochs), nn.eval_['valid_acc'], label='validation', linestyle='--')
+plt.ylabel('Accuracy')
+plt.xlabel('Epochs')
+plt.title('Acuracy vs Epochs')
+plt.show()
+
+y_test_pred = nn.predict(X_test)
+acc = (np.sum(y_test == y_test_pred).astype(np.float)/X_test.shape[0])
+print('Training Accuracy: %.2f%%' %(acc*100))
+
+
+# Images that MLP struggles with 
+
+miscl_img = X_test[y_test != y_test_pred][:25]
+correct_lab = y_test[y_test == y_test_pred][:25]
+miscl_lab = y_test[y_test != y_test_pred][:25]
+
+fig, ax = plt.subplots(nrows=5, ncols=5, sharex=True, sharey=True)
+ax = ax.flatten()
+for i in range(25):
+    img = miscl_img[i].reshape(28,28)
+    ax[i].imshow(img, cmap='Greys', interpolation='nearest')
+    ax[i].set_title('%d) t: %d p: %d' %(i+1, correct_lab[i], miscl_lab[i]))
+
+ax[0].set_xticks([])
+ax[0].set_yticks([])
+plt.tight_layout()
+plt.show()
+
+#from feed_forward_multi_layer_perceptron import NeuralNetMLP 
