@@ -24,6 +24,7 @@ import time
 import warnings
 from sklearn.linear_model import LinearRegression
 
+# Custom method to fit linear regrssion model
 def Linear_Regression_for_campaign(X,y):
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
     regressor = LinearRegression()  

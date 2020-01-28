@@ -109,7 +109,7 @@ data_sorted['Time_spent_on_session_in_seconds'].corr(data_sorted['clickouts'])
 
 # There in not much relation between time spent and booking or clickouts
 
-
+"""
 # Clicksouts vs booking
 sns.catplot(x="clickouts", y="booking",  kind="swarm" ,data=data_sorted)
 plt.show()
@@ -120,6 +120,7 @@ data_1 = data_sorted[data_sorted['booking']==1]
 
 sns.catplot(x="clickouts", y="booking", data=data_1)
 sns.catplot(x="clickouts", y="booking",  kind="swarm" ,data=data_1)
+"""
 
 # Checking number of bookings for different clickout values
 booking_for_clickouts_0 = data_1.groupby(['clickouts']).size()
@@ -129,7 +130,7 @@ booking_for_clickouts_1 = data_0.groupby(['clickouts']).size()
 print("Clickouts for positive booking : ", booking_for_clickouts_1)
 
 
-# Fitting LR for data where booking = 1
+# Fitting LR for data 
 
 y_data_sorted = data_sorted.booking.values.reshape(-1,1)
 X_data_sorted = data_sorted.clickouts.values.reshape(-1,1)
@@ -160,10 +161,6 @@ Root Mean Squared Error: 0.2966227295624976
 
 # There is a positive corelation between the time spent on the site and booking. But the 
 # coefficient of determination is very low.
-
-y_data_sorted_booking = data_sorted.booking.values.reshape(-1,1)
-X_data_sorted_sess_start_time = data_sorted.sess_start_time.values.reshape(-1,1)
-Linear_Regression_for_campaign(X_data_sorted_sess_start_time, y_data_sorted_booking)
 
 
 for i in range(0,10000,500):
@@ -243,11 +240,38 @@ Root Mean Squared Error: 0.3057386670276449
 
 """
 
+# Prepairing data for logistic regression. 
+# I have used clickouts, time spent in seconds, and hours of the time to for a logisitic regrssion model.
+hour = (data_sorted['sess_start_time'])
+sorted_hour = []
+for i in  data_sorted.index:
+    sorted_hour.append(hour[i].hour)
+
+sorted_hours_start_time = pd.Series(sorted_hour, index=data_sorted.index)    
+df_log_reg = data_sorted
+df_log_reg['hours'] = sorted_hours_start_time
+
+X_df_logistic_regression = df_log_reg['clickouts','Time_spent_on_session_in_seconds','hours'] 
+y_logistic_regression = df_log_reg['booking']
+
 from sklearn.linear_model import LogisticRegression
 logreg = LogisticRegression()
-X_train, X_test, y_train, y_test = train_test_split(X_data_postive_time_spent, y_data_postive_time_booking, test_size=0.3, random_state=0)
+X_train, X_test, y_train, y_test = train_test_split(X_df_logistic_regression, y_logistic_regression, test_size=0.3, random_state=0)
 logreg.fit(X_train,y_train )
 y_pred = logreg.predict(X_test)
 print('Accuracy of logistic regression classifier on test set: {:.2f}'.format(logreg.score(X_test, y_test)))
 from sklearn.metrics import classification_report
 print(classification_report(y_test, y_pred))
+
+"""
+                  precision    recall  f1-score   support
+
+           0       0.90      1.00      0.95      2675
+           1       0.00      0.00      0.00       305
+
+    accuracy                           0.90      2980
+   macro avg       0.45      0.50      0.47      2980
+weighted avg       0.81      0.90      0.85      2980
+
+    """
+# The score for booking = 1, are very low. 
